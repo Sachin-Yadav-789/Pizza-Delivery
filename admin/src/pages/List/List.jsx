@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './List.css'
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -9,10 +9,11 @@ const List = ({url}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchList = useCallback(async () => {
+  const fetchList = async () => {
+    setLoading(true);
+    setError('');
     try {
       const response = await axios.get(`${url}/api/food/list`);
-      setError('');
       if (response.data.success && Array.isArray(response.data.data)) {
         setList(response.data.data);
       } else {
@@ -26,7 +27,7 @@ const List = ({url}) => {
     } finally {
       setLoading(false);
     }
-  }, [url]);
+  }
 
   const removeFood = async(foodId) => {
     try {
@@ -45,8 +46,32 @@ const List = ({url}) => {
 
 
   useEffect(() => {
-    fetchList();
-  }, [fetchList]);
+    let isCurrent = true;
+    axios.get(`${url}/api/food/list`)
+      .then((response) => {
+        if (!isCurrent) return;
+        if (response.data.success && Array.isArray(response.data.data)) {
+          setList(response.data.data);
+          setError('');
+        } else {
+          throw new Error(response.data.message || 'Could not load food items.');
+        }
+      })
+      .catch((requestError) => {
+        if (!isCurrent) return;
+        console.error('Failed to fetch food list:', requestError);
+        const message = 'Could not load food items. Make sure the backend and database are running.';
+        setError(message);
+        toast.error(message);
+      })
+      .finally(() => {
+        if (isCurrent) setLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [url]);
  
   return (
     <div className='list add flex-col'>
