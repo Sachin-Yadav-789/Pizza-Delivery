@@ -1,4 +1,3 @@
-import React from 'react'
 import Navbar from './components/Navbar/Navbar'
 import Sidebar from './components/Sidebar/Sidebar'
 import {Routes , Route} from 'react-router-dom'
@@ -9,7 +8,11 @@ import { ToastContainer } from 'react-toastify';
 
 const App = () => {
 
-   const url = "http://localhost:4000"
+   const url = import.meta.env.VITE_API_URL || (
+      import.meta.env.DEV
+         ? "http://localhost:4000"
+         : "https://pizza-delivery-backend-lnkk.onrender.com"
+   )
 
   return (
     <div>
