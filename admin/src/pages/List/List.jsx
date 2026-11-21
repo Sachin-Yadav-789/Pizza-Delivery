@@ -1,38 +1,53 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import './List.css'
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 
 const List = ({url}) => {
-  
- 
-  const[list , setList] = useState([]);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const fetchList = async () => {
-    const response = await axios.get(`${url}/api/food/list`);
-   
-  if(response.data.success){
-      setList(response.data.data);
-    }else{
-      toast.error("Error")
+  const fetchList = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await axios.get(`${url}/api/food/list`);
+      if (response.data.success && Array.isArray(response.data.data)) {
+        setList(response.data.data);
+      } else {
+        throw new Error(response.data.message || 'Could not load food items.');
+      }
+    } catch (requestError) {
+      console.error('Failed to fetch food list:', requestError);
+      const message = 'Could not load food items. Make sure the backend and database are running.';
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
     }
-  }
+  }, [url]);
 
   const removeFood = async(foodId) => {
-      const response = await axios.post(`${url}/api/food/remove`,{id:foodId})
-      await fetchList();
-      if(response.data.success){
-        toast.success(response.data.message)
-      }else{
-        toast.error("Error");
+    try {
+      const response = await axios.post(`${url}/api/food/remove`, { id: foodId });
+      if (response.data.success) {
+        toast.success(response.data.message);
+        await fetchList();
+      } else {
+        toast.error(response.data.message || 'Could not remove food item.');
       }
+    } catch (requestError) {
+      console.error('Failed to remove food item:', requestError);
+      toast.error('Could not remove food item.');
+    }
   }
 
 
   useEffect(() => {
-     fetchList();
-  },[])
+    fetchList();
+  }, [fetchList]);
  
   return (
     <div className='list add flex-col'>
@@ -45,17 +60,26 @@ const List = ({url}) => {
              <b>Price</b>
              <b>Action</b>
          </div>
-          {list.map((item,index) => {
-              return(
-                  <div key={index}className='list-table-format'>
-                   <img src={`${url}/images/`+item.image} alt="" />
-                   <p>{item.name}</p> 
-                   <p>{item.category}</p>
-                   <p>&#8377;{item.price}</p>
-                   <p onClick={()=>removeFood(item._id)} className='cursor'>X</p>
-                    </div>
-              )
-          })}
+          {loading ? (
+            <p>Loading food items...</p>
+          ) : error ? (
+            <div>
+              <p>{error}</p>
+              <button type="button" onClick={fetchList}>Retry</button>
+            </div>
+          ) : list.length === 0 ? (
+            <p>No food items found. Add an item to see it here.</p>
+          ) : (
+            list.map((item) => (
+              <div key={item._id} className='list-table-format'>
+                <img src={`${url}/images/${item.image}`} alt={item.name} />
+                <p>{item.name}</p>
+                <p>{item.category}</p>
+                <p>&#8377;{item.price}</p>
+                <p onClick={() => removeFood(item._id)} className='cursor'>X</p>
+              </div>
+            ))
+          )}
        </div>
       
     </div>
