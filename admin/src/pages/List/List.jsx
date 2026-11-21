@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './List.css'
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -10,10 +10,9 @@ const List = ({url}) => {
   const [error, setError] = useState('');
 
   const fetchList = useCallback(async () => {
-    setLoading(true);
-    setError('');
     try {
       const response = await axios.get(`${url}/api/food/list`);
+      setError('');
       if (response.data.success && Array.isArray(response.data.data)) {
         setList(response.data.data);
       } else {
@@ -65,7 +64,11 @@ const List = ({url}) => {
           ) : error ? (
             <div>
               <p>{error}</p>
-              <button type="button" onClick={fetchList}>Retry</button>
+              <button type="button" onClick={() => {
+                setLoading(true);
+                setError('');
+                fetchList();
+              }}>Retry</button>
             </div>
           ) : list.length === 0 ? (
             <p>No food items found. Add an item to see it here.</p>
