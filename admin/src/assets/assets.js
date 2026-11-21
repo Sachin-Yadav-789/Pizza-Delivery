@@ -14,4 +14,4 @@ export const assets ={
     parcel_icon
 }
 
-export const url = ' https://pizza-delivery-fct9.onrender.com'
+export const url = 'https://pizza-delivery-backend-lnkk.onrender.com'
