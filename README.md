@@ -16,7 +16,7 @@ For specific setup instructions, features, and environment variables, check the 
 
 ## 🛠️ Tech Stack
 
-* **Frontend & Admin:** React.js, CSS / Tailwind
+* **Frontend & Admin:** React.js, CSS
 * **Backend:** Node.js, Express.js
 * **Database:** MongoDB
 
@@ -28,10 +28,25 @@ For specific setup instructions, features, and environment variables, check the 
    cd Pizza-Delivery
    ```
 
-2. **Install dependencies and run each service:**
-   * Open separate terminals in `backend`, `frontend`, and `admin`, then run:
+2. **Install dependencies and run each service** in its own terminal:
+
+   Backend:
    ```bash
+   cd backend
    npm install
-   npm run server # backend
-   npm run dev    # frontend and admin
+   npm run server
+   ```
+
+   Customer frontend:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+   Admin dashboard:
+   ```bash
+   cd admin
+   npm install
+   npm run dev
    ```
